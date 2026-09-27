@@ -1,0 +1,9 @@
+.git
+**/node_modules
+**/dist
+**/target
+**/.DS_Store
+**/*.zip
+**/.env
+**/.env.*
+!**/.env.example

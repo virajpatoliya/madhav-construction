@@ -1,6 +1,6 @@
 
-// const API_BASE_URL = "http://localhost:8081/v2/api";
-const API_BASE_URL = "/v2/api";
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
+const API_BASE_URL = configuredApiUrl ? `${configuredApiUrl}/v2/api` : "/v2/api";
 // ✅ Reusable fetch wrapper
 export const apiRequest = async (
     endpoint: string,

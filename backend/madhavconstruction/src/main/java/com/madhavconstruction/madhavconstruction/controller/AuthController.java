@@ -3,8 +3,8 @@ package com.madhavconstruction.madhavconstruction.controller;
 import com.madhavconstruction.madhavconstruction.model.Session;
 import com.madhavconstruction.madhavconstruction.repository.SessionRepository;
 import com.madhavconstruction.madhavconstruction.service.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -26,6 +26,12 @@ public class AuthController {
     private final AuthService authService;
     private final SessionRepository sessionRepository;
 
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite;
+
     @PostMapping("/register")
     public Map<String, String> register(@RequestBody Map<String, String> body) {
         String username = body.get("username");
@@ -46,11 +52,14 @@ public class AuthController {
         }
 
         Session session = sessionOpt.get();
-        Cookie cookie = new Cookie("SESSIONID", session.getToken());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600); // 1 hour
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("SESSIONID", session.getToken())
+            .httpOnly(true)
+            .secure(cookieSecure)
+            .path("/")
+            .maxAge(3600)
+            .sameSite(cookieSameSite)
+            .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return Map.of("status", "logged-in");
     }
@@ -65,9 +74,10 @@ public class AuthController {
             // Clear cookie
             ResponseCookie deleteCookie = ResponseCookie.from("SESSIONID", "")
                     .httpOnly(true)
+                    .secure(cookieSecure)
                     .path("/")
                     .maxAge(0) // 🔥 expires immediately
-                    .sameSite("Lax")
+                    .sameSite(cookieSameSite)
                     .build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
