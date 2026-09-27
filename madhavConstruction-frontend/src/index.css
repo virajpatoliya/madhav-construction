@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 43 96% 56%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  @keyframes infinite-scroll {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+
+    /* Adjust based on duplication */
+  }
+
+  .scroll-marquee {
+    display: flex;
+    width: max-content;
+    animation: infinite-scroll 60s linear infinite;
+  }
+
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 43 96% 56%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Construction Theme Colors */
+:root {
+  --color-construction-50: #f9fafb;
+  --color-construction-100: #f3f4f6;
+  --color-construction-200: #e5e7eb;
+  --color-construction-300: #d1d5db;
+  --color-construction-400: #9ca3af;
+  --color-construction-500: #6b7280;
+  --color-construction-600: #4b5563;
+  --color-construction-700: #374151;
+  --color-construction-800: #1f2937;
+  --color-construction-900: #111827;
+
+  --color-accent: #f59e0b;
+  --color-accent-light: #fbbf24;
+  --color-accent-dark: #d97706;
+}
+
+/* Custom Container */
+.container-custom {
+  @apply container mx-auto px-4 max-w-7xl;
+}
+
+/* Section Spacing */
+.section-padding {
+  @apply py-16 md:py-24;
+}
+
+/* Section Titles */
+.section-title {
+  @apply text-3xl md:text-4xl font-display font-bold text-construction-800 mb-4;
+}
+
+.section-subtitle {
+  @apply text-construction-500 max-w-2xl;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply bg-accent hover:bg-accent-dark text-construction-900 font-medium py-3 px-6 rounded-sm transition-colors duration-300;
+}
+
+.btn-secondary {
+  @apply bg-construction-800 hover:bg-construction-700 text-white font-medium py-3 px-6 rounded-sm transition-colors duration-300;
+}
+
+.btn-outline {
+  @apply border-2 border-construction-800 text-construction-800 hover:bg-construction-800 hover:text-white font-medium py-[10px] px-6 rounded-sm transition-colors duration-300;
+}
+
+/* Card Shadow */
+.card-shadow {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
+}
+
+/* Image Reveal Animation */
+.image-reveal {
+  position: relative;
+}
+
+.image-reveal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-accent);
+  transform-origin: right;
+  transition: transform 0.5s ease-in-out;
+}
+
+.image-reveal.revealed::after {
+  transform: scaleX(0);
+}
+
+/* Fade-in-up Animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease forwards;
+}
+
+/* Fade-in Animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease forwards;
+}
+
+/* Slide-in-right Animation */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease forwards;
+}
+
+/* Slide-in-left Animation */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease forwards;
+}
+
+/* Scale-up Animation */
+@keyframes scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-up {
+  animation: scale-up 0.6s ease forwards;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}

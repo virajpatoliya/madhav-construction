@@ -1,0 +1,177 @@
+backend
+cd C:\StartupWorkspace\construction management system\backend\madhavconstruction
+
+frontend
+cd C:\StartupWorkspace\frontend\madhavConstruction-frontend
+
+
+# Madhav Construction Project Deployment Guide
+
+## 1. Server Access 
+
+```
+ssh -i property-pem.pem ubuntu@13.205.84.104
+```
+
+## 2. Upload Frontend (React) Build
+
+**From your local machine (Windows example with SCP):**
+
+```
+scp -i jay-k.pem -r C:\StartupWorkspace\frontend\madhavConstruction-frontend\dist\* ubuntu@54.145.4.215:/home/ubuntu/new_build/
+```
+
+**On server, move/update frontend folder:**
+new one
+sudo cp -r /home/ubuntu/new_build/* /var/www/madhavconstruction/
+sudo chown -R www-data:www-data /var/www/madhavconstruction
+sudo chmod -R 755 /var/www/madhavconstruction
+
+
+øld one
+```
+sudo systemctl stop madhavbackend
+sudo rm -rf /home/ubuntu/frontend/*
+sudo cp -r /home/ubuntu/new_build/* /home/ubuntu/frontend/
+sudo chown -R ubuntu:www-data /home/ubuntu/frontend
+sudo chmod -R 755 /home/ubuntu/frontend
+```dfgdfgfdgfdgd
+
+## 3. Upload Backend (Spring Boot JAR) Build
+
+**From local machine (SCP):**
+
+```
+scp -i property-pem.pem "C:\StartupWorkspace\construction management system\backend\madhavconstruction\target\app.jar" ubuntu@13.205.84.104:/home/ubuntu/
+```
+
+**On server, restart backend service:**
+
+```
+sudo systemctl stop madhavbackend
+sudo systemctl start madhavbackend
+sudo systemctl status madhavbackend
+```
+
+**Build backend locally without running tests:**
+
+```
+mvn clean package -DskipTests
+```
+
+## 4. Nginx Management
+
+**Sites Available / Enabled:**
+
+```
+cd /etc/nginx/sites-available/
+sudo nano madhavfrontend
+sudo ln -s /etc/nginx/sites-available/madhavfrontend /etc/nginx/sites-enabled/
+sudo systemctl reload nginx
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+**Default frontend config (`madhavfrontend`):**
+
+```
+server {
+    listen 80;
+    server_name _;
+
+    root /home/ubuntu/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /v2/api/ {
+        proxy_pass http://127.0.0.1:8081/v2/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / "/; HttpOnly; SameSite=lax";
+    }
+}
+```
+
+## 5. Logs
+
+**Backend logs (systemd + custom log file):**
+
+```
+new
+
+sudo chown -R ubuntu:ubuntu /opt/madhavconstruction
+sudo mv /home/ubuntu/app.jar /opt/madhavconstruction/
+
+
+old
+sudo systemctl status madhavbackend
+sudo journalctl -u madhavbackend -f
+tail -f /home/ubuntu/app.log
+```
+
+**Nginx logs:**
+
+```
+sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/access.log
+```
+
+## 6. Permissions & Ownership
+
+```
+sudo chown -R ubuntu:www-data /home/ubuntu/frontend
+sudo chmod -R 755 /home/ubuntu/frontend
+```
+
+## 7. Systemd Service File (Backend)
+
+`/etc/systemd/system/madhavbackend.service`
+
+```
+[Unit]
+Description=Madhav Construction Backend
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu
+ExecStart=/usr/bin/java -jar /home/ubuntu/app.jar
+Environment="MONGODB_USERNAME=triangledeal"
+Environment="MONGODB_PASSWORD=DMJvd7T20WwZGr9P"
+Environment="MONGODB_DB=madhavconstruction"
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+StandardOutput=file:/home/ubuntu/app.log
+StandardError=file:/home/ubuntu/app.log
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Reload systemd after editing service file:**
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart madhavbackend
+sudo systemctl enable madhavbackend
+
+```
+
+## 8. Common Commands
+
+```
+sudo systemctl start madhavbackend
+sudo systemctl stop madhavbackend
+sudo systemctl restart madhavbackend
+sudo journalctl -u madhavbackend -f
+tail -f /home/ubuntu/app.log
+sudo systemctl reload nginx
+sudo systemctl restart nginx
+sudo systemctl status nginx
+sudo rm -rf /home/ubuntu/frontend/*
