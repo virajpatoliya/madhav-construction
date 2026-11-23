@@ -4,25 +4,29 @@ const API_BASE_URL = configuredApiUrl ? `${configuredApiUrl}/v2/api` : "/v2/api"
 // ✅ Reusable fetch wrapper
 export const apiRequest = async (
     endpoint: string,
-    options: RequestInit & { responseType?: "json" | "blob" } = {}
+    options: RequestInit & {
+        responseType?: "json" | "blob";
+        silentStatuses?: number[];
+    } = {}
 ) => {
     const url = `${API_BASE_URL}${endpoint}`;
+    const { responseType, silentStatuses = [], ...requestOptions } = options;
 
     const res = await fetch(url, {
+        ...requestOptions,
         // ✅ always include cookies (required for SESSIONID)
         credentials: "include",
         // ✅ ensure correct mode for cross-origin requests
         mode: "cors",
         headers: {
             // ✅ Only set JSON header when body exists and not blob
-            ...(options.responseType === "blob"
+            ...(responseType === "blob"
                 ? {}
                 : options.body
                     ? { "Content-Type": "application/json" }
                     : {}),
             ...(options.headers || {}),
         },
-        ...options,
     });
 
     // ✅ Handle CORS or network errors more gracefully
@@ -34,12 +38,19 @@ export const apiRequest = async (
             errorText = `Request failed with status ${res.status}`;
         }
 
-        console.error(`❌ API Error: [${res.status}] `, errorText);
-        throw new Error(errorText || `Request failed: ${res.status}`);
+        if (!silentStatuses.includes(res.status)) {
+            console.error(`❌ API Error: [${res.status}] `, errorText);
+        }
+
+        const error = new Error(errorText || `Request failed: ${res.status}`) as Error & {
+            status: number;
+        };
+        error.status = res.status;
+        throw error;
     }
 
     // ✅ If downloading a file (PDF, Excel, etc.)
-    if (options.responseType === "blob") {
+    if (responseType === "blob") {
         return res; // return full Response object for caller to handle
     }
 

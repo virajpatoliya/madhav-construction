@@ -18,15 +18,34 @@ export class SessionExpiredError extends Error {
     }
 }
 
-export const checkSession = async (): Promise<boolean> => {
+let sessionCheck: Promise<boolean> | null = null;
+
+const requestSession = async (): Promise<boolean> => {
     try {
-        await apiRequest("/auth/session", { method: "GET" });
+        await apiRequest("/auth/session", {
+            method: "GET",
+            silentStatuses: [401, 440],
+        });
         return true;
-    } catch (err: any) {
-        // if backend returns 401 or 440 (login timeout), mark as expired
-        if (err?.status === 401 || err?.status === 440) {
+    } catch (err) {
+        const status = err instanceof Error && "status" in err
+            ? err.status
+            : undefined;
+
+        if (status === 440) {
             throw new SessionExpiredError();
         }
+
         return false;
     }
+};
+
+export const checkSession = (): Promise<boolean> => {
+    if (!sessionCheck) {
+        sessionCheck = requestSession().finally(() => {
+            sessionCheck = null;
+        });
+    }
+
+    return sessionCheck;
 };
